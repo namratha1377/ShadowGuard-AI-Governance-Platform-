@@ -1,0 +1,54 @@
+# ====================================================================
+# ShadowGuard Monorepo Containerized Deployment (Future Scope Reference)
+# ====================================================================
+# This docker-compose configuration orchestrates the ShadowGuard platform:
+# 1. frontend: Vite + React 18 UI (Port 5173)
+# 2. backend: Express API + SQLite (Port 4000)
+# 3. harness: Python/FastAPI Evaluation Harness (Port 8000)
+# ====================================================================
+
+version: '3.8'
+
+services:
+  # Python / FastAPI Evaluation Harness Service
+  harness:
+    build:
+      context: ./harness
+      dockerfile: Dockerfile
+    container_name: shadowguard-harness
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  # Node.js / Express API Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shadowguard-backend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - JWT_SECRET=shadowguard_super_secret_jwt_key_2026
+      - HARNESS_URL=http://harness:8000
+    depends_on:
+      - harness
+    restart: unless-stopped
+
+  # React / Vite Web Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shadowguard-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:4000/api
+    depends_on:
+      - backend
+    restart: unless-stopped

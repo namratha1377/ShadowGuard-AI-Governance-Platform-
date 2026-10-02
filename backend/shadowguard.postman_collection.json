@@ -1,0 +1,330 @@
+{
+  "info": {
+    "_postman_id": "c1f2e3d4-5678-490a-bcde-shadowguard001",
+    "name": "ShadowGuard API",
+    "description": "Postman collection covering authentication, RBAC, and all REST API endpoints for ShadowGuard.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data) {",
+                  "    pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sarah.connor@shadowguard.io\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Log in with email and password to receive JWT access token (15m) and refresh token (7d)."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Obtain a new 15-minute access token using a valid 7-day refresh token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Metrics (Open)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "metrics"]
+            },
+            "description": "Open demo endpoint: fetch overall metrics, verdict breakdown %, daily volume, per-app counts, and 5 recent alerts."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI Interactions",
+      "item": [
+        {
+          "name": "Get Paginated Interactions (Open)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ai-interactions?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai-interactions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Open demo endpoint: get paginated list of logged AI prompt interactions."
+          },
+          "response": []
+        },
+        {
+          "name": "Log New AI Interaction (Admin/Analyst)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"Alex Mercer\",\n  \"department\": \"Engineering\",\n  \"targetApp\": \"ChatGPT\",\n  \"prompt\": \"Refactor database query optimization helper\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai-interactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai-interactions"]
+            },
+            "description": "Requires Auth (Admin/Analyst). Log a new prompt interaction."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Risk Assessments",
+      "item": [
+        {
+          "name": "Get Risk Assessments (Admin/Analyst)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk-assessments?page=1&limit=10&tier=High",
+              "host": ["{{baseUrl}}"],
+              "path": ["risk-assessments"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "tier", "value": "High" }
+              ]
+            },
+            "description": "Requires Auth (Admin/Analyst)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Data Security Logs",
+      "item": [
+        {
+          "name": "Get Data Security Logs (Admin/Analyst)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-security?page=1&limit=10&category=PII",
+              "host": ["{{baseUrl}}"],
+              "path": ["data-security"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "category", "value": "PII" }
+              ]
+            },
+            "description": "Requires Auth (Admin/Analyst)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Policies",
+      "item": [
+        {
+          "name": "Get All Policies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies"]
+            },
+            "description": "Fetch all security policies."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Policy Status (Admin Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"disabled\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/policies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", "1"]
+            },
+            "description": "Requires Auth (Admin Only). Toggles status and automatically records audit log entry."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/audit-logs?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["audit-logs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Requires Auth."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings"]
+            },
+            "description": "Fetch organization settings."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Settings (Admin Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retention_days\": 180\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings"]
+            },
+            "description": "Requires Auth (Admin Only). Updates organization settings and logs audit event."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

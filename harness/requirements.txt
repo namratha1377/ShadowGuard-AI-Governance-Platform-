@@ -1,0 +1,18 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+python-dotenv>=1.0.1
+
+# Phase 9: Real Detection Engine Dependencies
+# Post-install step: python -m spacy download en_core_web_sm
+# Note on spaCy model selection: en_core_web_sm (~12MB) is selected for fast installation and low memory footprint.
+# Tradeoff: en_core_web_lg (~500MB) offers higher NER precision for subtle context, but sm is sufficient for MVP.
+presidio-analyzer>=2.2.0
+presidio-anonymizer>=2.2.0
+spacy>=3.7.0
+
+# Used by the harness policy bridge and AI generation client
+requests>=2.31.0
+
+# LangGraph orchestration used by orchestrator/graph.py
+langgraph>=0.2.0

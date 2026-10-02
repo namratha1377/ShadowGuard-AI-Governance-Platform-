@@ -1,0 +1,42 @@
+{
+  "wu": 0.25,
+  "wd": 0.35,
+  "we": 0.20,
+  "wp": 0.20,
+  "department_baseline": {
+    "Engineering": 60,
+    "Finance": 65,
+    "Legal": 70,
+    "HR": 50,
+    "Marketing": 30,
+    "Sales": 35,
+    "Executive": 75,
+    "Default": 45
+  },
+  "endpoint_trust": {
+    "ChatGPT": 70,
+    "Claude": 65,
+    "Perplexity": 80,
+    "Gemini": 65,
+    "Internal Copilot": 15,
+    "ShadowGuard Sandbox": 10,
+    "Default": 80
+  },
+  "entity_severity": {
+    "AWS Access Key": 95,
+    "Private Key Header": 95,
+    "Generic API Key/Token": 85,
+    "US_SSN": 90,
+    "CREDIT_CARD": 85,
+    "Internal Repo Path": 75,
+    "Attorney-Client Privilege": 80,
+    "Board Meeting Minutes": 75,
+    "EBITDA Mention": 70,
+    "Balance Sheet Mention": 70,
+    "Quarterly Revenue": 65,
+    "Acquisition Target": 75,
+    "EMAIL_ADDRESS": 30,
+    "PHONE_NUMBER": 40,
+    "Default": 50
+  }
+}

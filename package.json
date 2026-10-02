@@ -1,0 +1,15 @@
+{
+  "name": "shadowguard-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ShadowGuard Monorepo",
+  "scripts": {
+    "dev": "concurrently --names \"FRONTEND,BACKEND,HARNESS\" --prefix-colors \"cyan.bold,green.bold,magenta.bold\" \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\" \"npm run dev --prefix harness\"",
+    "lint": "npm run lint --prefix frontend && npm run lint --prefix backend",
+    "format": "npm run format --prefix frontend && npm run format --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.3"
+  }
+}
