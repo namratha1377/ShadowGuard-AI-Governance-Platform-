@@ -12,7 +12,8 @@ import {
   Settings,
   ShieldCheck,
   X,
-  Send,
+  Send, 
+  BarChart3,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,7 +29,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
   const navItems = isAdmin
     ? [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Submit Prompt', path: '/prompt', icon: Send },
+        { name: 'Submit Prompt', path: '/prompt', icon: Send }, 
+        { name: 'AI Analytics', path: '/analytics', icon: BarChart3 },
         { name: 'AI Activity', path: '/activity', icon: Activity },
         { name: 'Risk Assessment', path: '/risk', icon: ShieldAlert },
         { name: 'Data Security', path: '/data-security', icon: Lock },

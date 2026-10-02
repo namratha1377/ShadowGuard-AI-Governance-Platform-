@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { SocketProvider } from './context/SocketContext';
 import { DashboardLayout } from './layout/DashboardLayout';
-import LandingPage from './pages/LandingPage';
+import LandingPage from './pages/LandingPage'; 
+import AIAnalyticsPage from './pages/AIAnalyticsPage';
 import DashboardPage from './pages/DashboardPage';
 import ActivityPage from './pages/ActivityPage';
 import RiskPage from './pages/RiskPage';
@@ -34,7 +35,8 @@ export const App: React.FC = () => {
             <Route path="/prompt" element={<PromptPage />} />
 
             {/* Authenticated Admin Dashboard & Operations */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<DashboardLayout />}> 
+            <Route index element={<DashboardPage />} />
               <Route index element={<DashboardPage />} />
               <Route path="activity" element={<ActivityPage />} />
               <Route path="risk" element={<RiskPage />} />
@@ -47,7 +49,8 @@ export const App: React.FC = () => {
             </Route>
 
             {/* Top-level route aliases for workspace convenience */}
-            <Route element={<DashboardLayout />}>
+            <Route element={<DashboardLayout />}> 
+            <Route path="/analytics" element={<AIAnalyticsPage />} />
               <Route path="/activity" element={<ActivityPage />} />
               <Route path="/risk" element={<RiskPage />} />
               <Route path="/data-security" element={<DataSecurityPage />} />
