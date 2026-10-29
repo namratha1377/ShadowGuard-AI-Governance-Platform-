@@ -1,232 +1,239 @@
 # ShadowGuard: Adaptive AI Governance Platform
 
-ShadowGuard is an enterprise AI governance platform designed to provide a controlled interface between employees and external AI services. The platform evaluates prompts before they are sent to an AI provider, applies security and policy controls, and records governance activity for authorized administrators.
+ShadowGuard is an AI governance platform designed to provide a controlled interface between employees and external AI services. It evaluates prompts before they reach an AI provider, applies security and policy controls, and provides authorized administrators with governance information for reviewing potentially risky interactions.
 
-The current implementation focuses on adaptive prompt evaluation, confidential-data protection, role-based access control, and controlled Gemini-based response generation.
+The project focuses on adaptive prompt evaluation, confidential-data protection, role-based access control, and controlled AI response generation through Google's Gemini API.
+
+The primary research contribution is the **Adaptive Secure AI Harness (ASAH)**, an orchestration layer designed to select and apply appropriate security evaluation and verification workflows based on request context and risk.
 
 ## Overview
 
-ShadowGuard separates employee-facing AI interaction from administrator-facing governance information.
+ShadowGuard separates the employee-facing AI experience from administrator-facing security and governance information.
 
-For an employee request:
+The request-processing workflow is designed to:
 
-1. The request is authenticated and associated with the employee.
-2. The ShadowGuard harness evaluates the prompt for sensitivity, confidential information, personally identifiable information, financial information, and secrets.
-3. Requests that satisfy the configured security policies can be sent to the configured AI provider.
-4. Confidential or restricted requests are prevented from being sent to the model and are presented to the employee with a limited status such as `In Review` or `Blocked`.
-5. Governance metadata such as risk scores, policy matches, detected entities, workflow details, and internal security reasoning is reserved for authorized administrator views.
-6. Generated responses are checked before being returned to the employee.
+1. Authenticate incoming requests and associate them with the relevant user.
+2. Evaluate prompts for potentially sensitive information, including personally identifiable information (PII), financial information, confidential organizational data, and secrets.
+3. Apply configured security policies to determine whether a request can proceed.
+4. Restrict or flag requests that require blocking or further review.
+5. Keep detailed risk assessments, policy evaluations, and internal security metadata available only to authorized administrators.
+6. Check generated responses before returning them to employees.
 
-This separation is intended to reduce accidental disclosure of organizational governance information while maintaining a usable AI interface for legitimate requests.
+This approach aims to reduce accidental disclosure of sensitive information while maintaining a usable AI interaction experience.
 
-## Architecture
+## Key Features
 
-The repository is organized as a monorepo containing three primary services.
+- **Adaptive prompt evaluation:** Evaluates incoming prompts using security detection, risk assessment, and policy logic.
+- **Confidential-data protection:** Identifies potentially sensitive requests before they are sent to the configured AI provider.
+- **Role-based access control (RBAC):** Separates employee capabilities from administrator privileges.
+- **Administrator governance console:** Provides authorized administrators with access to risk assessments, policy information, audit records, and review workflows.
+- **Human-in-the-loop review:** Supports handling requests that require additional review.
+- **Gemini integration:** Uses Google's Gemini API for AI response generation.
+- **Output security checks:** Applies response validation before returning generated content.
+- **Real-time communication:** Uses Socket.IO for communication and status updates between the backend and clients.
 
-| Component | Technology | Default Port | Responsibility |
-| --- | --- | --- | --- |
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS | 5173 | Employee prompt interface and administrator console |
-| Backend | Node.js, Express, TypeScript, Socket.IO, SQLite | 4000 | Authentication, RBAC, API gateway, persistence, and real-time updates |
-| Harness | Python, FastAPI, Uvicorn, LangGraph, Presidio, Gemini | 8000 | Prompt evaluation, risk assessment, security orchestration, and AI generation |
+## System Architecture
+
+ShadowGuard is organized as a monorepo containing three primary services.
+
+| Component | Technologies | Default Port | Responsibility |
+|---|---|---:|---|
+| Frontend | React, TypeScript, Vite, Tailwind CSS | 5173 | Employee interface and administrator console |
+| Backend | Node.js, Express.js, TypeScript, Socket.IO, SQLite | 4000 | API gateway, authentication, access control, persistence, and real-time communication |
+| Adaptive Security Harness | Python, FastAPI, Uvicorn, LangGraph, Presidio, Gemini | 8000 | Prompt evaluation, risk assessment, security orchestration, and AI generation |
 
 ### Request Flow
 
-```text
-Employee
-   |
-   v
-React Frontend
-   |
-   | HTTP / Socket.IO
-   v
-Express Gateway
-   |
-   | Authenticated Request
-   v
-Adaptive Security Harness
-   |
-   +--> Prompt Evaluation
-   |       |
-   |       +--> Allowed --------> Gemini Generation
-   |       |
-   |       +--> Restricted/Blocked
-   |
-   +--> Output Security Checks
-   |
-   v
-Employee-Safe Response
+The following flow illustrates how ShadowGuard processes employee requests and separates security evaluation from administrator governance.
 
-Administrator
-   |
-   v
-Administrator Console
-   |
-   v
-Governance Metadata, Reviews, Audit Information,
-Risk Assessment, Policies, and Harness Traces
+```text
+                    EMPLOYEE
+                        |
+                        v
+                 REACT FRONTEND
+                        |
+                        v
+                 EXPRESS BACKEND
+                        |
+                        v
+             AUTHENTICATION AND RBAC
+                        |
+                        v
+            ADAPTIVE SECURE AI HARNESS
+                        |
+                        v
+               PROMPT EVALUATION
+                        |
+                        v
+                 POLICY DECISION
+                  /           \
+                 /             \
+                v               v
+             ALLOWED       RESTRICTED /
+                |            BLOCKED
+                v               |
+          GEMINI API             v
+                |          EMPLOYEE-SAFE
+                v             STATUS
+        OUTPUT SECURITY
+             CHECKS
+                |
+                v
+       EMPLOYEE-SAFE RESPONSE
+
+
+       ADMINISTRATOR WORKFLOW
+
+          ADMINISTRATOR
+                |
+                v
+       ADMINISTRATOR CONSOLE
+                |
+                v
+       GOVERNANCE INFORMATION
+                |
+                +-- Risk Assessments
+                +-- Policy Evaluation
+                +-- Audit Records
+                +-- Security Events
+                +-- Review Workflows
+                +-- Harness Traces
 ```
+
+**How it works:** Employee prompts pass through authentication and security evaluation before a policy decision determines whether they can proceed. Permitted requests are sent to Gemini and checked before the response is returned. Restricted requests receive an appropriate status or response. Detailed governance information is intended for authorized administrators only.
+
 
 ## Technology Stack
 
 ### Frontend
 
 | Technology | Purpose |
-| --- | --- |
-| React 18 | User interface and application components |
+|---|---|
+| React 18 | Building the user interface |
 | TypeScript | Type-safe frontend development |
-| Vite | Development server and frontend build tooling |
-| Tailwind CSS | Interface styling and responsive layouts |
-| Socket.IO Client | Real-time interaction and status updates |
+| Vite | Development server and build tooling |
+| Tailwind CSS | Styling and responsive layouts |
+| Socket.IO Client | Real-time communication with the backend |
 
 ### Backend
 
 | Technology | Purpose |
-| --- | --- |
-| Node.js | Backend runtime |
+|---|---|
+| Node.js | JavaScript runtime |
 | Express.js | REST API and application gateway |
 | TypeScript | Type-safe backend development |
-| Socket.IO | Real-time communication between server and clients |
+| Socket.IO | Real-time communication |
 | SQLite | Application data persistence |
 | better-sqlite3 | SQLite database integration |
-| JWT | Authentication and authorization |
+| JSON Web Tokens (JWT) | Token-based authentication and authorization |
 
-### Adaptive Security Harness
+### Adaptive Secure AI Harness
 
 | Technology | Purpose |
-| --- | --- |
-| Python 3.10+ | Security harness runtime |
-| FastAPI | Harness API layer |
-| Uvicorn | ASGI application server |
-| LangGraph | Adaptive orchestration and workflow execution |
-| Presidio | PII detection and analysis |
-| Gemini | AI response generation |
+|---|---|
+| Python 3.10+ | Harness runtime |
+| FastAPI | API layer for the security harness |
+| Uvicorn | ASGI server |
+| LangGraph | Workflow orchestration |
+| Microsoft Presidio | PII detection and analysis |
+| Google Gemini API | AI response generation |
 | Pydantic | Request and response validation |
 
-### Security and Governance Components
-
-| Component | Purpose |
-| --- | --- |
-| Role-Based Access Control | Separates employee and administrator capabilities |
-| Risk Assessment | Evaluates prompt sensitivity and security risk |
-| PII Detection | Identifies personally identifiable information |
-| Financial Information Detection | Identifies sensitive financial information |
-| Confidential Information Detection | Identifies organizationally sensitive requests |
-| Secret Detection | Identifies credentials, API keys, and other secrets |
-| Policy Enforcement | Determines whether requests can proceed |
-| Human-in-the-Loop Review | Handles requests requiring administrator review |
-| Audit Logging | Records security and governance activity |
-| Output Validation | Checks generated responses before delivery |
-
-## Core Capabilities
+## Security and Governance
 
 ### Adaptive Prompt Evaluation
 
-The harness evaluates incoming prompts using security detectors and risk-scoring logic.
+The harness evaluates incoming prompts using the security checks and risk-assessment logic configured in the application.
 
-Evaluation can incorporate:
+The evaluation workflow is designed to consider:
 
-- Confidential document and organizational information detection
-- Personally identifiable information detection
-- Financial information detection
-- Secret and credential detection
-- Risk scoring and risk tiers
-- Policy matching
-- Human review requirements
-- Security verification and orchestration
+- Personally identifiable information
+- Financial information
+- Confidential organizational information
+- Credentials, API keys, and other secrets
+- Risk scores and risk levels
+- Policy evaluation results
+- Requests that require additional review
 
-### Employee and Administrator Separation
-
-Employees receive only the information required to use the AI interface. Governance information is not exposed through the employee-facing interaction flow.
-
-Administrators have access to the governance information required for security review, including:
-
-- Risk assessment
-- Policy information
-- Audit records
-- Security events
-- Human review workflows
-- Harness and orchestration traces
-
-### Confidential-Data Protection
-
-Requests for sensitive organizational information, such as employee salary or personal employee details, can be restricted before they reach the AI provider.
-
-Normal prompts are allowed to proceed when they satisfy the configured policies.
-
-The system does not block a prompt solely because it contains generic words such as `password` or `email`. The security decision is based on the context detected by the evaluation layer.
-
-### Gemini Integration
-
-The current implementation uses Gemini as the available AI provider.
-
-Provider credentials are kept server-side and are not exposed to the frontend.
-
-The Gemini model can be configured through the harness environment.
+The final decision depends on the evaluation results and the policies configured in the system.
 
 ### Role-Based Access Control
 
-The application separates administrator and employee capabilities through authenticated role-based access control.
+ShadowGuard separates employee-facing functionality from administrator-facing governance capabilities.
 
-Administrator capabilities include:
+**Employee functionality**
+- Submit prompts for AI-assisted tasks.
+- Receive permitted AI responses.
+- View request status and permitted interaction history.
 
-- Risk assessment
-- Policy management
-- Audit information
-- Harness and orchestration traces
-- Human review workflows
-- Data security information
+**Administrator functionality**
+- Review risk assessments and policy evaluation details.
+- Access available audit records and security events.
+- Review requests requiring human intervention.
+- Inspect available harness and orchestration information.
 
-Employee capabilities focus on:
+Detailed governance information is intended for authorized administrators rather than ordinary employee accounts.
 
-- Submitting prompts
-- Receiving permitted AI responses
-- Viewing their own interaction history
-- Viewing request status
+### Confidential-Data Protection
+
+The system is designed to restrict requests that attempt to obtain sensitive organizational information, such as employee salary details or personal employee records.
+
+It distinguishes between the presence of a potentially sensitive word and the context in which that word is used. For example, mentioning `password` in a legitimate programming request should not automatically result in a block.
+
+### Gemini Integration
+
+The current implementation uses Google's Gemini API for AI response generation.
+
+- Provider credentials are configured on the server side.
+- The frontend should not contain or expose the Gemini API key.
+- The model can be configured through the harness environment.
+- Additional AI providers are potential future extensions.
 
 ## Repository Structure
 
 ```text
 ShadowGuard-AI-Governance-Platform/
-|
-+-- frontend/       React employee and administrator interfaces
-+-- backend/        Express API, authentication, RBAC, database, and Socket.IO
-+-- harness/        Python security evaluation and AI orchestration service
-+-- docker-compose.yml
-+-- package.json
-+-- README.md
-+-- RUN_GEMINI.md
-+-- DEMO_SCRIPT.md
-+-- PROGRESS.md
+├── frontend/
+│   └── React employee and administrator interfaces
+├── backend/
+│   └── Express API, authentication, RBAC, database, and Socket.IO
+├── harness/
+│   └── Python security evaluation and AI orchestration service
+├── docker-compose.yml
+├── package.json
+├── RUN_GEMINI.md
+├── DEMO_SCRIPT.md
+├── PROGRESS.md
+└── README.md
 ```
 
-## Prerequisites
+## Getting Started
 
-Install the following before running the project:
+The following instructions describe a local development setup using separate terminals for the frontend, backend, and harness.
+
+### Prerequisites
+
+Install:
 
 - Node.js 18 or later
 - npm
 - Python 3.10 or later
 - pip
+- A Google Gemini API key
 
-A Gemini API key is required for Gemini response generation.
+### 1. Configure the Environment
 
-## Configuration
+Create the required local environment files. Do not commit credentials or secrets to version control.
 
-Create the required environment files locally. Environment files are excluded from version control by the repository's `.gitignore`.
-
-### Harness Configuration
-
-Create `harness/.env`:
+**Harness configuration — `harness/.env`**
 
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=your_configured_gemini_model
 PORT=8000
 ```
 
-### Backend Configuration
-
-Create `backend/.env` with the values required by the local backend configuration:
+**Backend configuration — `backend/.env`**
 
 ```env
 PORT=4000
@@ -234,39 +241,50 @@ JWT_SECRET=your_local_jwt_secret
 HARNESS_URL=http://localhost:8000
 ```
 
-Do not commit API keys, JWT secrets, or other credentials to the repository.
+Use the environment variable names and values expected by the current application configuration. Replace the example values with your local configuration.
 
-## Installation
+### 2. Install Dependencies
 
-From the repository root:
+Run the following commands from the repository root in PowerShell.
+
+Install the root dependencies:
 
 ```powershell
 npm install
+```
 
+Install the frontend dependencies:
+
+```powershell
 cd frontend
 npm install
 cd ..
+```
 
+Install the backend dependencies:
+
+```powershell
 cd backend
 npm install
 cd ..
+```
 
+Create and activate the Python virtual environment:
+
+```powershell
 cd harness
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+deactivate
 cd ..
 ```
 
-On Linux or macOS:
+If PowerShell prevents virtual-environment activation, review your local PowerShell execution policy rather than changing system-wide security settings unnecessarily.
 
-```bash
-source harness/venv/bin/activate
-```
+### 3. Initialize the Database
 
-## Database Setup
-
-Initialize the backend database using the project's seed script:
+From the repository root:
 
 ```powershell
 cd backend
@@ -274,15 +292,13 @@ npm run db:seed
 cd ..
 ```
 
-The seed script initializes the database schema and project seed data defined by the backend.
+This runs the backend's database seed script to initialize the schema and seed data defined by the project.
 
-## Running the Application
+### 4. Start the Application
 
-Start the three services separately.
+Open three separate terminals.
 
-### 1. Start the Harness
-
-Open a terminal:
+**Terminal 1 — Adaptive Security Harness**
 
 ```powershell
 cd harness
@@ -290,179 +306,108 @@ cd harness
 python -m uvicorn main:app --port 8000
 ```
 
-The harness will run on:
-
-```text
-http://localhost:8000
-```
-
-### 2. Start the Backend
-
-Open another terminal:
+**Terminal 2 — Backend**
 
 ```powershell
 cd backend
 npm run dev
 ```
 
-The backend will run on:
-
-```text
-http://localhost:4000
-```
-
-### 3. Start the Frontend
-
-Open a third terminal:
+**Terminal 3 — Frontend**
 
 ```powershell
 cd frontend
 npm run dev
 ```
 
-The frontend will run on:
+Keep all three services running while using the application.
 
-```text
-http://localhost:5173
-```
+### 5. Access the Local Services
 
-### Service Endpoints
+| Service | Local URL |
+|---|---|
+| Frontend | [http://localhost:5173](http://localhost:5173) |
+| Backend | [http://localhost:4000](http://localhost:4000) |
+| Harness | [http://localhost:8000](http://localhost:8000) |
+| Harness health check | [http://localhost:8000/health](http://localhost:8000/health) |
+| Harness API documentation | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
-| Service | URL |
-| --- | --- |
-| Frontend | http://localhost:5173 |
-| Backend API | http://localhost:4000 |
-| Security Harness | http://localhost:8000 |
-| Harness Health Check | http://localhost:8000/health |
-| Harness API Documentation | http://localhost:8000/docs |
+These addresses are for local development and are not publicly accessible deployment URLs.
 
-## Verification
+## Verification and Testing
 
-A basic harness health check can be performed at:
+The harness health endpoint can be used to verify that the Python service is running:
 
 ```text
 http://localhost:8000/health
 ```
 
-The FastAPI service also exposes OpenAPI documentation while running.
+The FastAPI documentation is available at `/docs` while the harness is running.
 
-The application should be tested using both permitted and restricted request paths.
+Test the application with both permitted and restricted requests.
 
-| Test Case | Expected Behavior |
-| --- | --- |
-| Basic HTML/CSS/JavaScript coding request | Gemini response is returned |
-| General informational request | Gemini response is returned when supported |
-| Employee salary information request | Request is restricted or placed in review |
-| Employee personal-details request | Request is restricted or placed in review |
-| Credential or secret disclosure request | Request is restricted or blocked |
-| Normal login-page request containing `username` and `password` | Request can proceed when no sensitive information is being requested |
+| Test Scenario | Expected Behavior |
+|---|---|
+| General programming request | A response is returned when the request passes the configured checks |
+| General informational request | A response is returned when permitted by the configured policies |
+| Request for sensitive employee salary information | The request is restricted or sent for review, depending on the configured policy |
+| Request for private employee details | The request is restricted or sent for review, depending on the configured policy |
+| Request to disclose credentials or secrets | The request is restricted or blocked |
+| Legitimate programming request containing words such as `username` or `password` | The request can proceed when the evaluation determines that it does not violate the configured policies |
 
-## Security Workflow
-
-ShadowGuard follows a controlled request-processing workflow.
-
-```text
-User Prompt
-    |
-    v
-Authentication
-    |
-    v
-Prompt Evaluation
-    |
-    +----------------------------+
-    |                            |
-    v                            v
-Security Check              Risk Assessment
-    |                            |
-    +-------------+--------------+
-                  |
-                  v
-          Policy Decision
-                  |
-        +---------+---------+
-        |                   |
-        v                   v
-     Allowed          Restricted/Blocked
-        |                   |
-        v                   v
- Gemini Generation      Employee-Safe
-        |                 Response
-        v
- Output Security Check
-        |
-        v
- Employee-Safe Response
-```
-
-Governance information generated during this workflow is intended for authorized administrator access and is not exposed to ordinary employees.
-
-## Production Builds
-
-### Frontend
-
-```bash
-cd frontend
-npm run build
-```
-
-### Backend
-
-```bash
-cd backend
-npm run build
-```
+Actual results depend on the implementation, configuration, and policies in use. These scenarios describe intended verification behavior rather than a claim that every possible case has been tested.
 
 ## Security Considerations
 
-The repository intentionally excludes local environment files and generated database artifacts from version control.
+ShadowGuard demonstrates security controls for an AI governance workflow. It should not be considered production-ready solely because the local services run successfully.
 
-For any deployment beyond local development:
+Before deploying the system in a real organization:
 
-- Use a strong, unique JWT secret.
-- Store Gemini credentials in a secure secret-management system.
-- Do not expose provider API keys to the frontend.
-- Restrict administrator accounts and governance endpoints.
-- Review audit logs and security policies before deployment.
-- Configure production CORS, authentication, and network access appropriately.
-- Keep development credentials separate from production credentials.
-- Apply appropriate access controls to governance and audit information.
+- Store API keys and other credentials in a suitable secrets-management system.
+- Use strong, unique secrets and rotate them when necessary.
+- Enforce authorization on the backend for every protected endpoint; do not rely on frontend visibility controls alone.
+- Protect administrator accounts and governance endpoints.
+- Validate and sanitize inputs and outputs where appropriate.
+- Configure production CORS, network access, and transport security.
+- Protect audit records and sensitive governance metadata.
+- Test authentication, authorization, policy enforcement, and failure handling.
+- Review data retention and privacy requirements before storing prompts or generated responses.
 
-## Current Provider Configuration
+## Research Contribution: Adaptive Secure AI Harness
 
-ShadowGuard currently uses Gemini for AI response generation.
+The **Adaptive Secure AI Harness (ASAH)** is the primary research contribution of ShadowGuard.
 
-The provider configuration is intentionally kept server-side. The frontend should not directly communicate with Gemini or expose the Gemini API key.
+It provides an orchestration layer intended to select and apply appropriate security evaluation, verification, and governance workflows based on the context and risk characteristics of an AI request.
 
-Additional AI providers may be integrated in future versions through the provider abstraction layer.
+Rather than treating AI governance as a simple prompt filter, the research explores how multiple security checks and workflow decisions can be coordinated within a controlled AI interaction pipeline.
 
-## Project Scope
-
-The current implementation focuses on the adaptive security and governance layer that evaluates employee-to-AI requests.
-
-The Adaptive Secure AI Harness is the primary research contribution. It provides the orchestration layer responsible for selecting and applying appropriate evaluation, security, verification, and governance workflows based on request context.
-
-The project is designed to demonstrate how enterprise organizations can introduce governance controls around employee use of generative AI while maintaining a usable AI interaction experience.
+The project investigates the integration of adaptive orchestration, sensitive-data detection, risk assessment, policy enforcement, and administrator oversight into an enterprise-oriented AI governance platform.
 
 ## Future Development
 
-Planned development areas include:
+Potential areas for further development include:
 
-- Enhanced administrator governance dashboards
-- Additional AI provider integrations
-- Advanced security analytics
-- Expanded policy configuration
-- Improved risk visualization for administrators
-- Additional security verification mechanisms
+- Expanded administrator dashboards and risk visualizations
+- Integration with additional AI providers
+- More configurable governance policies
+- Enhanced security verification workflows
 - Expanded audit and compliance capabilities
-- More adaptive orchestration strategies
+- Additional adaptive orchestration strategies
+- More comprehensive automated testing
+- Deployment hardening and operational monitoring
 
-## Academic and Research Context
+These are future development areas and should not be interpreted as completed features unless implemented.
 
-ShadowGuard is developed as an academic and research project focused on enterprise AI governance, secure generative AI adoption, and responsible AI usage.
+## Academic Context
 
-The Adaptive Secure AI Harness forms the core research contribution by introducing an adaptive orchestration layer capable of selecting security and verification mechanisms based on the context and risk characteristics of an AI request.
+ShadowGuard is an academic and research project focused on enterprise AI governance, secure generative AI adoption, and responsible use of AI services.
 
-## License
+The Adaptive Secure AI Harness forms the central research contribution by exploring how security and verification workflows can be selected and orchestrated according to request context and risk.
 
-This project is developed for academic and research purposes focused on enterprise AI governance, security, and responsible use of generative AI.
+The project demonstrates an approach to placing governance controls between employees and generative AI services while keeping detailed security information available to authorized administrators.
+
+## License and Usage
+
+This repository is intended for academic, research, and demonstration purposes.
+
+No specific open-source license is declared in this README. Unless a license file is added to the repository, others should not assume that the source code is released under an open-source license.
